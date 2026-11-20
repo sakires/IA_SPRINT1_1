@@ -5,6 +5,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from indusense.identity_markdown import ColumnStats, IdentityMarkdown
+
 
 class IdentityGenerator:
     """Génère la carte d'identité (markdown) d'un fichier de données.
@@ -35,39 +37,31 @@ class IdentityGenerator:
         target_dir.mkdir(parents=True, exist_ok=True)
         target = target_dir / f"{source.stem}_{begin.strftime('%H%M%S')}.md"
 
-        lines = [
-            f"# Identité : {source.name}",
-            "",
-            f"- Source: {self._relative_path(source)}",
-            f"- Filesize: {self._human_size(source.stat().st_size)}",
-            f"- ProcessBeginAt: {begin:%H:%M:%S}",
-            f"- ProcessEndAt: {end:%H:%M:%S}",
-            f"- Charset: {charset}",
-            f"- Rows Number: {len(df)}",
-            f"- Cols Number: {len(df.columns)}",
-            "",
-            "## Colonnes",
-            "",
-            "| Colname | Infered Type |",
-            "| ------- | ------------ |",
-            *(f"| {col} | {t} |" for col, t in types.items()),
-            "",
-            "## Statistiques",
-            "",
-            "| Colname | Min | Max | Mean | Median |",
-            "| ------- | --- | --- | ---- | ------ |",
-        ]
+        markdown = IdentityMarkdown(
+            source=self._relative_path(source),
+            filesize=source.stat().st_size,
+            begin=begin,
+            end=end,
+            charset=charset,
+            rows=len(df),
+            cols=len(df.columns),
+            columns=types,
+            stats=self._stats(df, types),
+        )
+        target.write_text(markdown.render(), encoding="utf-8")
+        return target
 
+    @staticmethod
+    def _stats(df: pd.DataFrame, types: dict[str, str]) -> list[ColumnStats]:
+        stats = []
         for col, t in types.items():
             if t == "NUMERIC":
                 s = df[col]
-                lines.append(f"| {col} | {s.min()} | {s.max()} | {s.mean():.3f} | {s.median()} |")
+                stats.append(ColumnStats(col, s.min(), s.max(), s.mean(), s.median()))
             elif t == "DATE":
                 s = pd.to_datetime(df[col], errors="coerce")
-                lines.append(f"| {col} | {s.min()} | {s.max()} | - | - |")
-
-        target.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        return target
+                stats.append(ColumnStats(col, s.min(), s.max(), is_date=True))
+        return stats
 
     @staticmethod
     def _relative_path(path: Path) -> str:
@@ -76,7 +70,7 @@ class IdentityGenerator:
         return path.relative_to(root).as_posix() if root else path.as_posix()
 
     @staticmethod
-    def _detect_charset(path: Path) -> str:
+    def _detect_charset(path: Path) -> str | None:
         raw = path.read_bytes()
         for enc in ("utf-8", "iso-8859-1"):
             try:
@@ -84,7 +78,7 @@ class IdentityGenerator:
                 return enc
             except UnicodeDecodeError:
                 continue
-        return "unknown"
+        return None  # affiché « Inconnu » dans la carte
 
     @staticmethod
     def _infer_type(s: pd.Series) -> str:
@@ -98,11 +92,3 @@ class IdentityGenerator:
         if not sample.empty and sample.str.match(r"^\d{4}-\d{2}-\d{2}").all():
             return "DATE"
         return "TEXT"
-
-    @staticmethod
-    def _human_size(size: float) -> str:
-        for unit in ("o", "Ko", "Mo", "Go"):
-            if size < 1024:
-                return f"{size:.2f} {unit}"
-            size /= 1024
-        return f"{size:.2f} To"
