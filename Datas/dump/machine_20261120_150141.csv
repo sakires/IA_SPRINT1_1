@@ -1,0 +1,16 @@
+machine_code,commissioning_date,max_daily_capacity,max_hourly_capacity_pieces,model,production_line,location,criticality
+MACH-01,2021-05-12,770,48,InduPress-X2,Ligne-A,Atelier-2,MEDIUM
+MACH-02,2024-09-07,800,50,InduPress-X2,Ligne-A,Atelier-1,LOW
+MACH-03,2019-07-23,1405,88,InduPress-X1,Ligne-B,Atelier-1,HIGH
+MACH-04,2023-01-07,750,47,InduPress-Z1,Ligne-C,Atelier-3,LOW
+MACH-05,2024-03-11,1380,86,InduPress-X2,Ligne-C,Atelier-1,HIGH
+MACH-06,2022-01-01,1351,84,InduPress-X3,Ligne-A,Atelier-1,LOW
+MACH-07,2025-05-25,1428,89,InduPress-Z1,Ligne-A,Atelier-3,MEDIUM
+MACH-08,2023-10-18,1158,72,InduPress-X1,Ligne-B,Atelier-2,HIGH
+MACH-09,2023-01-15,1056,66,InduPress-X2,Ligne-B,Atelier-3,MEDIUM
+MACH-10,2021-04-16,778,49,InduPress-X3,Ligne-A,Atelier-3,LOW
+MACH-11,2022-09-15,984,62,InduPress-X2,Ligne-B,Atelier-1,MEDIUM
+MACH-12,2024-02-21,838,52,InduPress-Z1,Ligne-B,Atelier-2,MEDIUM
+MACH-13,2019-12-30,907,57,InduPress-X3,Ligne-C,Atelier-3,MEDIUM
+MACH-14,2021-10-21,1191,74,InduPress-X2,Ligne-A,Atelier-3,LOW
+MACH-15,2022-03-16,1027,64,InduPress-X2,Ligne-A,Atelier-3,MEDIUM
