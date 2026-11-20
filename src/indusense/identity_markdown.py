@@ -28,6 +28,7 @@ class IdentityMarkdown:
     est remplacée par 'Inconnu' dans le Markdown produit.
     """
 
+    title: str | None = None              # par défaut : nom du fichier source
     source: str | None = None             # chemin relatif à la racine du projet
     filesize: int | None = None           # en octets
     begin: datetime | None = None
@@ -39,7 +40,12 @@ class IdentityMarkdown:
     stats: list[ColumnStats] | None = field(default=None)
 
     def render(self) -> str:
-        title = PurePosixPath(self.source).name if self._is_known(self.source) else UNKNOWN
+        if self._is_known(self.title):
+            title = self.title
+        elif self._is_known(self.source):
+            title = PurePosixPath(self.source).name
+        else:
+            title = UNKNOWN
         lines = [
             f"# Identité : {title}",
             "",

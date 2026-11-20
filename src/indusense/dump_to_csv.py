@@ -1,6 +1,7 @@
 """Conversion d'un dump SQL (PostgreSQL) en fichiers CSV."""
 
 from datetime import datetime
+from decimal import Decimal
 from pathlib import Path
 
 import pandas as pd
@@ -69,6 +70,8 @@ class DumpToCsv:
     def _toPython(value: exp.Expression):
         """Convertit un littéral SQL en valeur Python ('a' -> str, 12 -> int, NULL -> None, TRUE -> bool)."""
         try:
-            return value.to_py()
+            py = value.to_py()
+            # Decimal('2.5') donnerait une colonne `object` dans pandas : on passe en float
+            return float(py) if isinstance(py, Decimal) else py
         except ValueError:
             return value.sql()  # expression non littérale (ex: NOW()) : on garde le texte SQL
